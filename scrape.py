@@ -4,14 +4,23 @@ import requests
 
 from lxml import html
 
+# '//*[re:match(text(), "' + fa_pattern + '", "i")]/parent::div//a[re:match(., "' + course + '", "i")]/@href' - course_xpath, var course is from cmd line
+#'first(-|\s)?aid\s*courses?' - fa_pattern
+# 'https://www.alertfirstaid.com/first-aid-course.php' ^^^^^
+# '//*[re:match(., "' + location + '", "i") and re:match(., "schedule", "i") and re:match(., "recert", "i")]/a/@href' - links to courses (recert)
+# '//*[re:match(., "' + location + '", "i") and re:match(., "schedule", "i") and not(re:match(., "recert", "i"))]/a/@href' - links to courses
+# "//*[contains(@id, 'Recert')]/following-sibling::table//tr" - courses from table
+
 recert_flag = False
 namespaces = {"re": "http://exslt.org/regular-expressions"}
 
-def get_html(url):
+
+def get_html(frl):
 	"""Make a request to the given URL and return the HTML content"""
 	content = requests.get(url)
 	tree = html.fromstring(content.text)
 	return tree
+
 
 def filter_urls(l):
 	"""Filter out any PDFs and duplicates in lists"""
@@ -19,39 +28,10 @@ def filter_urls(l):
 	tmp = list(set(tmp))
 	return tmp
 
+
 def find_course(course, location):
 	global namespaces
 	global recert_flag
-
-	ns = {"re": "http://exslt.org/regular-expressions"}
-	fa_pattern = 'first(-|\s)?aid\s*courses?'
-	course_xpath = '//*[re:match(text(), "' + fa_pattern + '", "i")]/parent::div//a[re:match(., "' + course + '", "i")]/@href'
-	# print(course_xpath)
-	tree = get_html('https://www.alertfirstaid.com/first-aid-course.php')
-	course_url = tree.xpath(course_xpath, namespaces = namespaces)
-	print(course_url)
-	tree = get_html(course_url[0])
-	if recert_flag:
-		course_url = tree.xpath('//*[re:match(., "' + location + '", "i") and re:match(., "schedule", "i") and re:match(., "recert", "i")]/a/@href', namespaces = namespaces)
-	else:
-		course_url = tree.xpath('//*[re:match(., "' + location + '", "i") and re:match(., "schedule", "i") and not(re:match(., "recert", "i"))]/a/@href', namespaces = namespaces)
-
-	course_url = filter_urls(course_url)
-
-	recerts = []
-	for url in course_url:
-		tree = get_html(url)
-		date = tree.xpath("//*[contains(@id, 'Recert')]/following-sibling::table//tr")
-		for recert in date:
-			recert = recert.text_content()
-			recert = " ".join(recert.split())
-			recert = recert.replace('\n', '')
-			recert = recert.replace('\r', '')
-			recerts.append(recert)
-	filter_object = filter(lambda x: x != "", recerts)
-	recerts = list(filter_object)
-	print(recerts)
-
 
 
 def main():
