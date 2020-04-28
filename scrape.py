@@ -1,8 +1,7 @@
 import argparse
 import re
-import requests
+import selenium
 
-from lxml import html
 
 # '//*[re:match(text(), "' + fa_pattern + '", "i")]/parent::div//a[re:match(., "' + course + '", "i")]/@href' - course_xpath, var course is from cmd line
 #'first(-|\s)?aid\s*courses?' - fa_pattern
