@@ -2,6 +2,8 @@ import argparse
 import re
 import selenium
 
+#test
+
 
 # '//*[re:match(text(), "' + fa_pattern + '", "i")]/parent::div//a[re:match(., "' + course + '", "i")]/@href' - course_xpath, var course is from cmd line
 #'first(-|\s)?aid\s*courses?' - fa_pattern
